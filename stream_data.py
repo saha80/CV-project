@@ -3,11 +3,12 @@
 # http://picamera.readthedocs.io/en/latest/recipes2.html#web-streaming
 
 import io
-import picamera
 import logging
 import socketserver
-from threading import Condition
 from http import server
+from threading import Condition
+
+import picamera
 
 PAGE = """\
 <html>
@@ -19,7 +20,7 @@ PAGE = """\
 <center><img src="stream.mjpg" width="640" height="480"></center>
 </body>
 </html>
-"""
+""".encode('utf-8')
 
 
 class StreamingOutput(object):
@@ -41,20 +42,23 @@ class StreamingOutput(object):
 
 
 class StreamingHandler(server.BaseHTTPRequestHandler):
+    # handle http GET request
     def do_GET(self):
+        # http://raspberrypy.local/
         if self.path == '/':
-            self.send_response(301)
+            self.send_response(301)  # Moved Permanently
             self.send_header('Location', '/index.html')
             self.end_headers()
+        # http://raspberrypy.local/index.html
         elif self.path == '/index.html':
-            content = PAGE.encode('utf-8')
-            self.send_response(200)
+            self.send_response(200)  # OK
             self.send_header('Content-Type', 'text/html')
-            self.send_header('Content-Length', len(content))
+            self.send_header('Content-Length', len(PAGE))
             self.end_headers()
-            self.wfile.write(content)
+            self.wfile.write(PAGE)
+        # http://raspberrypy.local/stream.mjpg
         elif self.path == '/stream.mjpg':
-            self.send_response(200)
+            self.send_response(200)  # OK
             self.send_header('Age', 0)
             self.send_header('Cache-Control', 'no-cache, private')
             self.send_header('Pragma', 'no-cache')
@@ -76,8 +80,9 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 logging.warning(
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
+        # bad url request
         else:
-            self.send_error(404)
+            self.send_error(404)  # Not Found
             self.end_headers()
 
 
