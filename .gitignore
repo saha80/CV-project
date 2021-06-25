@@ -1,0 +1,10 @@
+# ignore all
+*
+# unignore .gitignore file
+!.gitignore
+# unignore html
+!*.html
+# unignore markdown
+!*.md
+# unignore python
+!*.py

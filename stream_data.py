@@ -106,10 +106,9 @@ with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
         camera.stop_recording()
 
 
-def main(args: List[str]):
+# def main(args: List[str]):
+#     return
 
-    return
 
-
-if __name__ == "__main__":
-    main(sys.argv)
+# if __name__ == "__main__":
+#     main(sys.argv)
