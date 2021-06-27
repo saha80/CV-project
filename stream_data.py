@@ -3,26 +3,22 @@
 # http://picamera.readthedocs.io/en/latest/recipes2.html#web-streaming
 
 import io
-import sys
 import logging
 import socketserver
-from http import server
-from http import HTTPStatus
-from threading import Condition
-from typing import List
+import sys
+import threading
+from http import HTTPStatus, server
 from pathlib import Path
+from typing import List
 
 import picamera
-
-
-PAGE = Path("index.html").read_bytes()
 
 
 class StreamingOutput(object):
     def __init__(self):
         self.frame = None
         self.buffer = io.BytesIO()
-        self.condition_var = Condition()
+        self.condition_var = threading.Condition()
 
     def write(self, buf):
         if buf.startswith(b'\xff\xd8'):
@@ -68,9 +64,9 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.end_headers()
             try:
                 while True:
-                    with output_stream.condition_var:
-                        output_stream.condition_var.wait()
-                        frame = output_stream.frame
+                    with OUTPUT_STREAM.condition_var:
+                        OUTPUT_STREAM.condition_var.wait()
+                        frame = OUTPUT_STREAM.frame
                     self.wfile.write(b'--FRAME\r\n')
 
                     self.send_header('Content-Type', 'image/jpeg')
@@ -92,23 +88,27 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     daemon_threads = True
 
 
-# def launch_http_server():
-with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
-    output_stream = StreamingOutput()
-    # Uncomment the next line to change your Pi's Camera rotation (in degrees)
-    # camera.rotation = 90
-    camera.start_recording(output_stream, format='mjpeg')
-    try:
-        address = ('', 8000)  # http port = 8000
-        server = StreamingServer(address, StreamingHandler)
-        server.serve_forever()
-    finally:
-        camera.stop_recording()
+PAGE = Path("index.html").read_bytes()
+OUTPUT_STREAM = StreamingOutput()
 
 
-# def main(args: List[str]):
-#     return
+def main(args: List[str]):
+    with picamera.PiCamera(resolution=args[1], framerate=int(args[2])) as camera:
+        # Uncomment the next line to change your Pi's Camera rotation (in degrees)
+        # camera.rotation = 90
+        camera.start_recording(OUTPUT_STREAM, format='mjpeg')
+        try:
+            address = ('', 8000)  # http port = 8000
+            server = StreamingServer(address, StreamingHandler)
+            server.serve_forever()
+        finally:
+            camera.stop_recording()
+    return
 
 
-# if __name__ == "__main__":
-#     main(sys.argv)
+if __name__ == "__main__":
+    if(len(sys.argv) == 3):
+        main(sys.argv)
+    else:
+        print("Usage: program_name [resolution] [framerate]\n"
+              " Resolution example - 640x480")

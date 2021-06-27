@@ -4,6 +4,8 @@
 !.gitignore
 # unignore html
 !*.html
+# unignore javascript
+!*.js
 # unignore markdown
 !*.md
 # unignore python
