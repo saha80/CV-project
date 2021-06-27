@@ -15,7 +15,7 @@ from pathlib import Path
 import picamera
 
 
-PAGE = Path("index.html").read_text(encoding='utf-8')
+PAGE = Path("index.html").read_bytes()
 
 
 class StreamingOutput(object):
