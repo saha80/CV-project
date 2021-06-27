@@ -1,5 +1,8 @@
 # ignore all
 *
+# unignore ".vscode" folder
+# !.vscode/
+
 # unignore .gitignore file
 !.gitignore
 # unignore html
