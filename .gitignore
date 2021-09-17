@@ -4,8 +4,11 @@
 # unignore ".vscode" folder
 # !.vscode/
 
-# unignore ".vscode" folder
-!CV_project_UE
+# unignore CV_project_UE folder
+!CV_project_UE/
+
+# unignore CV_project_UE folder
+!3D_model/
 
 # unignore .gitignore file
 !.gitignore
